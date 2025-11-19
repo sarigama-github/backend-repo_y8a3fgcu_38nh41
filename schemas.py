@@ -11,8 +11,8 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, HttpUrl
+from typing import Optional, List, Dict
 
 # Example schemas (replace with your own):
 
@@ -38,11 +38,25 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Wallpaper marketplace schemas
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class ResolutionLinks(BaseModel):
+    mobile: Optional[HttpUrl] = Field(None, description="Direct URL for mobile resolution (e.g., 1080x2400)")
+    desktop: Optional[HttpUrl] = Field(None, description="Direct URL for desktop/4K resolution (e.g., 3840x2160)")
+
+class Wallpaper(BaseModel):
+    """
+    Wallpapers collection schema
+    Collection name: "wallpaper"
+    """
+    title: str = Field(..., description="Wallpaper title")
+    anime: str = Field(..., description="Anime name or series")
+    tags: List[str] = Field(default_factory=list, description="Searchable tags")
+    thumbnail_url: HttpUrl = Field(..., description="Preview/thumbnail image URL")
+    image_urls: ResolutionLinks = Field(..., description="Download URLs by device type")
+    is_premium: bool = Field(False, description="Whether this wallpaper requires purchase")
+    price: float = Field(0.0, ge=0, description="Price in USD if premium")
+    author: Optional[str] = Field(None, description="Artist/Uploader name")
+    color_palette: List[str] = Field(default_factory=list, description="Dominant colors (hex)")
+    aspect_ratio: Optional[str] = Field(None, description="e.g., 16:9, 21:9, 9:16")
+    downloads: int = Field(0, ge=0, description="Download count")
